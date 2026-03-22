@@ -1,5 +1,5 @@
 🛡️ SafeCity AI
-🚀 Unified Autonomous Surveillance & Intelligence System
+🚀 Autonomous Surveillance & Intelligence System
 
 
 
@@ -13,40 +13,43 @@
 
 
 🚀 Transforming CCTV into an AI-powered autonomous decision-making system
+
+SafeCity AI is a real-time AI surveillance platform that combines Computer Vision, Vector Search, and LLM reasoning to detect, understand, and respond to incidents automatically.
+
 🧠 Overview
 
-SafeCity AI is a next-generation AI-powered surveillance platform that transforms traditional CCTV systems from passive monitoring → active intelligent systems.
+SafeCity AI upgrades traditional CCTV systems from passive monitoring → intelligent decision-making systems.
 
-It combines:
+It integrates:
 
-🎥 Real-time computer vision (YOLOv8)
+🎥 Real-time video analysis (YOLOv8)
 🧠 Semantic understanding via embeddings
-🔍 Vector search using Endee
+🔍 Vector similarity search using Endee
 🤖 Retrieval-Augmented Generation (RAG)
 ⚡ Real-time alerts via WebSockets
 💻 Interactive command center dashboard
 🚨 Problem Statement
 
-Traditional surveillance systems rely heavily on human monitoring, leading to:
+Traditional surveillance systems:
 
-Delayed response to critical incidents
-Human error and missed detections
-No contextual understanding
-No use of historical incident intelligence
+Require continuous human monitoring
+Miss critical incidents
+Provide no contextual understanding
+Do not use historical incident intelligence
 
-👉 There is no system that understands, learns, and recommends actions in real time.
+👉 There is no system that can detect, understand, and recommend actions in real time
 
 💡 Solution
 
 SafeCity AI introduces:
 
-Real-time detection
+Automated incident detection
 Semantic incident understanding
 Historical similarity search
-AI-powered decision recommendations
+AI-generated recommendations
 🔥 What Makes This Unique?
-Combines Computer Vision + RAG (rare in projects)
-Uses Endee vector database for semantic intelligence
+Combines Computer Vision + RAG (rare combination)
+Uses Endee vector DB for semantic intelligence
 Converts detection → decision-making system
 Full-stack real-time pipeline (CV + Backend + Frontend)
 🧩 System Architecture
@@ -60,23 +63,30 @@ Embedding Model
         ↓
 Endee Vector Database
         ↓
-Retriever (Top-K)
+Retriever (Top-K Similar Incidents)
         ↓
 RAG (LLM Reasoning)
         ↓
 FastAPI + WebSockets
         ↓
 React Dashboard
-🗄️ How Endee is Used (Core Requirement)
+⚙️ How It Works (End-to-End Flow)
+YOLOv8 detects suspicious activity
+Incident is converted into structured text
+Text is converted into embeddings
+Stored in Endee vector database
+Similar incidents retrieved
+RAG generates insights (risk, reason, action)
+Alert sent to dashboard via WebSocket
+🗄️ Endee Integration (Core Requirement)
 
-Endee is used as the central vector database powering semantic search.
+Endee is used as the central vector database for semantic retrieval.
 
 Workflow:
-Incident → converted to text
-Text → embedding (Sentence Transformers)
+Incident → Text → Embedding
 Stored in Endee with metadata
 Queried using similarity search
-Top-K results passed to RAG
+Top-K results passed into RAG
 Example Data Schema:
 {
   "id": "incident_001",
@@ -88,63 +98,71 @@ Example Data Schema:
     "type": "violence"
   }
 }
-🔗 Endee Repository Usage (Mandatory)
-⭐ Starred: https://github.com/endee-io/endee
-🍴 Forked: https://github.com/vikassaini77/endee
-Integrated into backend via:
-backend/app/services/endee_client.py
-🚀 Features
-🎥 Real-Time Detection
-YOLOv8-based violence detection
-Live video processing
-Smart alert triggering
-🧠 AI Intelligence
-Incident description generation
-Embedding storage
-Semantic understanding
-🔍 Semantic Search
-{
-  "query": "person fighting at night"
-}
-
-Returns similar incidents + insights
-
-🤖 RAG Decision System
-{
-  "risk": "High",
-  "reason": "Matches past violent patterns",
-  "action": "Dispatch patrol"
-}
-💻 Dashboard
-Real-time alerts
-Interactive maps
-Threat analytics
-📸 Demo
-Dashboard
-
-Forensic Analysis
-
+🔌 Endee API Usage
+Operation	Endpoint	Purpose
+Create Index	POST /api/v1/index/create	Initialize vector index
+Upsert Vectors	POST /api/v1/index/{name}/upsert	Store incident embeddings
+Query	POST /api/v1/index/{name}/query	Retrieve similar incidents
+Get Stats	GET /api/v1/index/{name}/stats	Monitor database
+List Indexes	GET /api/v1/index/list	System health check
 📂 Project Structure
 SafeCity-AI/
+│
 ├── backend/
+│   ├── app/
+│   │   ├── inference/              # YOLOv8 detection
+│   │   ├── services/
+│   │   │   ├── incident_builder.py
+│   │   │   ├── embedding_service.py
+│   │   │   ├── endee_client.py
+│   │   │   ├── retriever.py
+│   │   │   ├── rag_pipeline.py
+│   │   │   └── alert_service.py
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── stream.py
+│   │   │   ├── upload.py
+│   │   │   ├── rag.py
+│   │   │   └── incidents.py
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── websocket_manager.py
+│   │   │   └── db_manager.py
+│   │   │
+│   │   └── main.py
+│   │
+│   ├── events/
+│   └── requirements.txt
+│
 ├── frontend/
-├── endee/
-├── events/
-├── README.md
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── services/api.js
+│
+├── endee/                          # Forked Endee repo
 ├── dashboard.png
 ├── forensic.png
+├── .env.example
+└── README.md
 📡 API Example
-POST /search
+Request
 {
   "query": "person fighting at night"
 }
 Response
 {
   "risk": "High",
+  "reason": "Matches previous violent patterns",
   "action": "Dispatch patrol"
 }
+📸 Demo
+Dashboard
+
+Forensic Analysis
+
 ⚙️ Setup Instructions
-1️⃣ Clone Repo
+1️⃣ Clone Repository
 git clone https://github.com/vikassaini77/SafeCity-AI
 cd SafeCity-AI
 2️⃣ Backend Setup
@@ -179,6 +197,9 @@ Retrieval-Augmented Generation (RAG)
 FastAPI Backend
 Real-time systems (WebSockets)
 Full-stack development
+🔗 Endee Repository Requirement
+⭐ Star: https://github.com/endee-io/endee
+🍴 Fork: https://github.com/vikassaini77/endee
 👨‍💻 Author
 
 Vikas Saini
