@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Node / React
+node_modules/
+dist/
+.DS_Store
+
+# ML / Data / Heavy Files
+*.pt
+*.onnx
+*.engine
+*.mp4
+*.avi
+*.db
+
+# Backend runtime files
+backend/events/*
+backend/**/*.db
+
+# Env files
+.env
+.env.*
+
+# OS / Misc
+.DS_Store
+Thumbs.db
