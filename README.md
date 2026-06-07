@@ -85,13 +85,13 @@ SafeCity AI utilizes a decoupled Client-Server architecture. The backend acts as
 
 ```mermaid
 graph TD
-    subgraph Edge / Camera
+    subgraph Edge["Edge / Camera"]
         Cam1[IP Camera / RTSP]
         Cam2[Live Webcam]
         Upload[Offline Video Upload]
     end
 
-    subgraph Backend Engine (FastAPI)
+    subgraph Backend["Backend Engine (FastAPI)"]
         Ingest[Stream Ingestion]
         AI[YOLO Inference + ByteTrack]
         Event[Behavioral Event Engine]
@@ -99,7 +99,7 @@ graph TD
         WS[WebSocket Manager]
     end
 
-    subgraph Frontend (React + Vite)
+    subgraph Frontend["Frontend (React + Vite)"]
         Dash[Command Dashboard]
         Alerts[Alert Center]
     end
