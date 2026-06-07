@@ -3,7 +3,6 @@ import shutil
 from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
 
 from app.routes import ingest, search, ask
 # Custom Imports
@@ -36,6 +35,9 @@ app.mount("/events", StaticFiles(directory="events"), name="events")
 # 5. Include Routers
 app.include_router(stream_router, prefix="/stream")
 app.include_router(events_router, prefix="/api")
+app.include_router(ingest.router)
+app.include_router(search.router)
+app.include_router(ask.router)
 
 # --- ENDPOINTS ---
 
@@ -79,17 +81,3 @@ async def analyze_uploaded_video(file: UploadFile = File(...)):
         return {"filename": file.filename, "results": result}
     except Exception as e:
         return {"error": str(e)}
-    # backend/app/main.py
-
-
-
-app = FastAPI(title="SafeCity AI - Endee Powered")
-
-app.include_router(ingest.router)
-app.include_router(search.router)
-app.include_router(ask.router)
-
-
-@app.get("/")
-def root():
-    return {"message": "SafeCity AI running 🚀"}

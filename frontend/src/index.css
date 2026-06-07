@@ -1,0 +1,270 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: rgba(55, 65, 81, 0.2);
+  }
+
+  body {
+    @apply bg-background text-gray-100;
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(0, 242, 255, 0.08) 0%, transparent 50%),
+      linear-gradient(to bottom, #080C18, #0A1020);
+    background-attachment: fixed;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-secondary-900/50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary-500/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary-500/50;
+  }
+
+  ::selection {
+    @apply bg-primary-500/30 text-white;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-surface/80 backdrop-blur-xl border border-primary-500/20 rounded-xl;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .glass-card-hover {
+    @apply glass-card;
+  }
+
+  .glass-card-hover:hover {
+    @apply border-primary-500/40;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .cyber-border {
+    @apply border border-primary-500/30 rounded-lg relative overflow-hidden;
+  }
+
+  .cyber-border::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-primary-500/0 via-primary-500/10 to-primary-500/0;
+    animation: borderGlow 3s linear infinite;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0 20px rgba(0, 242, 255, 0.3);
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 bg-primary-500 text-secondary-900 font-semibold rounded-lg
+           hover:bg-primary-400 active:bg-primary-600
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary:disabled:hover {
+    @apply bg-primary-500;
+  }
+
+  .btn-primary {
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-transparent border border-primary-500 text-primary-500 font-semibold rounded-lg
+           hover:bg-primary-500/10 active:bg-primary-500/20
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-secondary-900/80 border border-gray-700 rounded-lg
+           text-white placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500
+           transition-all duration-200;
+  }
+
+  .input-error {
+    @apply border-accent-red focus:ring-accent-red/50;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-300 mb-1.5;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-3 text-gray-400 rounded-lg
+           hover:bg-white/5 hover:text-white transition-all duration-200;
+  }
+
+  .nav-link.active {
+    @apply bg-primary-500/10 text-primary-500 border-l-2 border-primary-500;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border;
+  }
+
+  .status-online {
+    @apply bg-accent-green/20 text-accent-green border-accent-green/30;
+  }
+
+  .status-offline {
+    @apply bg-accent-red/20 text-accent-red border-accent-red/30;
+  }
+
+  .status-warning {
+    @apply bg-accent-yellow/20 text-accent-yellow border-accent-yellow/30;
+  }
+
+  .severity-low {
+    @apply bg-severity-low/20 text-severity-low border-severity-low/40;
+  }
+
+  .severity-medium {
+    @apply bg-severity-medium/20 text-severity-medium border-severity-medium/40;
+  }
+
+  .severity-high {
+    @apply bg-severity-high/20 text-severity-high border-severity-high/40;
+  }
+
+  .severity-critical {
+    @apply bg-severity-critical/20 text-severity-critical border-severity-critical/40;
+  }
+
+  .live-badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-mono font-bold text-accent-red
+           bg-accent-red/20 rounded animate-pulse;
+  }
+
+  .metric-card {
+    @apply glass-card p-5 relative overflow-hidden;
+  }
+
+  .metric-value {
+    @apply text-3xl font-heading font-bold text-white;
+  }
+
+  .metric-label {
+    @apply text-sm text-gray-400 mt-1;
+  }
+
+  .metric-delta {
+    @apply text-xs font-mono;
+  }
+
+  .metric-delta.positive {
+    @apply text-accent-green;
+  }
+
+  .metric-delta.negative {
+    @apply text-accent-red;
+  }
+
+  .table-container {
+    @apply glass-card overflow-hidden;
+  }
+
+  .table-header {
+    @apply bg-secondary-900/50 text-gray-400 text-xs uppercase tracking-wider;
+  }
+
+  .table-row {
+    @apply border-t border-gray-800/50 hover:bg-white/5 transition-colors;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 text-sm;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-2.5 text-gray-400 rounded-lg mx-2
+           hover:bg-white/5 hover:text-white transition-all duration-200 cursor-pointer;
+  }
+
+  .sidebar-item.active {
+    @apply bg-primary-500/10 text-primary-500;
+  }
+
+  .dropdown-menu {
+    @apply absolute right-0 mt-2 w-48 bg-surface border border-gray-800 rounded-lg shadow-xl py-1 z-50;
+  }
+
+  .dropdown-item {
+    @apply block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 transition-colors;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/70 backdrop-blur-sm z-50;
+  }
+
+  .modal-content {
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg
+           glass-card p-6 z-50;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .toast {
+    @apply fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .toast-success {
+    @apply bg-accent-green/20 border border-accent-green/30 text-accent-green;
+  }
+
+  .toast-error {
+    @apply bg-accent-red/20 border border-accent-red/30 text-accent-red;
+  }
+}
+
+@keyframes borderGlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@layer utilities {
+  .animate-counter {
+    animation: counter 1s ease-out forwards;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+  }
+
+  .grid-overlay {
+    background-image:
+      linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
