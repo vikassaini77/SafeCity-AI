@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/images/logo.png" width="200" alt="SafeCity AI Logo">
+  <img src="assets/images/logo_v2.png" width="200" alt="SafeCity AI Logo">
   <br />
   
 # 🏙️ SafeCity AI
@@ -19,7 +19,7 @@
 
 ---
 
-![SafeCity AI Dashboard](assets/images/dashboard.png)
+![SafeCity AI Dashboard](assets/images/dashboard_v2.png)
 
 ## 📑 Table of Contents
 
@@ -226,7 +226,7 @@ DESTINATION_PHONE=+0987654321
 1. **Dashboard Access:** Open `http://localhost:5173`.
 2. **Forensic Analysis:** Navigate to the Dashboard tab, upload an existing `.mp4` CCTV footage file. The AI will process it and dump events into the Alert Center.
    
-   ![Forensic Analysis](assets/images/forensic.png)
+   ![Forensic Analysis](assets/images/forensic_v2.png)
 
 3. **Live AI Webcam:** Navigate to "Live Feeds" and click "Start Live Webcam". The AI will hijack your local webcam, draw bounding boxes, and instantly trigger a `VIOLENCE` alert if physical struggle is simulated in front of the camera.
 
