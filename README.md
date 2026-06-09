@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield-check.svg" width="120" height="120" alt="SafeCity AI Logo" style="filter: drop-shadow(0 0 10px rgba(0,242,255,0.8));">
+  <img src="assets/images/logo.png" width="200" alt="SafeCity AI Logo">
   <br />
   
 # 🏙️ SafeCity AI
