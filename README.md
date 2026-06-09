@@ -1,5 +1,7 @@
 <div align="center">
-
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/shield-check.svg" width="120" height="120" alt="SafeCity AI Logo" style="filter: drop-shadow(0 0 10px rgba(0,242,255,0.8));">
+  <br />
+  
 # 🏙️ SafeCity AI
 
 **Intelligent Real-Time Vision for Safer Communities**
@@ -16,6 +18,8 @@
 </div>
 
 ---
+
+![SafeCity AI Dashboard](assets/images/dashboard.png)
 
 ## 📑 Table of Contents
 
@@ -72,10 +76,11 @@ The industry suffers from:
 | ------- | ----------- | ------ |
 | **Real-Time AI Processing** | Processes live RTSP/Webcam feeds via OpenCV & YOLOv8 at 30+ FPS. | 🟢 Active |
 | **Behavioral Event Engine** | Mathematical kinematic analysis to detect sustained violence/fights. | 🟢 Active |
+| **Weapon & Threat Detection** | Natively detects weapons (knives) and suspicious unattended objects. | 🟢 Active |
 | **WebSocket Alerts** | Pushes bi-directional alerts to the React dashboard with sub-second latency. | 🟢 Active |
 | **Auto-Clipping** | Maintains a rolling buffer to save 5s `.mp4` evidence clips dynamically. | 🟢 Active |
 | **Multi-Camera Grid** | Frontend supports up to 16 simultaneous stream visualizations. | 🟢 Active |
-| **SMS/Twilio Integration** | Dispatches high-priority SMS alerts for critical incidents. | 🟡 Beta |
+| **SMS/Twilio Integration** | Dispatches high-priority SMS alerts for critical incidents via Twilio. | 🟢 Active |
 
 ---
 
@@ -154,7 +159,8 @@ SafeCity-AI/
 | **Backend** | Python 3.10, FastAPI, Uvicorn, SQLAlchemy |
 | **AI/ML & Vision** | Ultralytics YOLOv8, OpenCV, ByteTrack, NumPy |
 | **Real-Time** | WebSockets, MJPEG Streaming |
-| **Database** | SQLite (Dev) / PostgreSQL (Prod ready) |
+| **Database** | PostgreSQL (Prod) / SQLite (Dev) |
+| **DevOps** | Docker, Docker Compose, Nginx |
 
 ---
 
@@ -204,7 +210,7 @@ PORT=8000
 HOST=0.0.0.0
 
 # Database
-DATABASE_URL=sqlite:///./safecity.db
+DATABASE_URL=postgresql://safecity:safecity_password@postgres:5432/safecity
 
 # API Keys (Optional)
 TWILIO_ACCOUNT_SID=your_sid
@@ -219,6 +225,9 @@ DESTINATION_PHONE=+0987654321
 
 1. **Dashboard Access:** Open `http://localhost:5173`.
 2. **Forensic Analysis:** Navigate to the Dashboard tab, upload an existing `.mp4` CCTV footage file. The AI will process it and dump events into the Alert Center.
+   
+   ![Forensic Analysis](assets/images/forensic.png)
+
 3. **Live AI Webcam:** Navigate to "Live Feeds" and click "Start Live Webcam". The AI will hijack your local webcam, draw bounding boxes, and instantly trigger a `VIOLENCE` alert if physical struggle is simulated in front of the camera.
 
 ---
@@ -310,12 +319,16 @@ npm run test
 
 ## ☁️ Deployment
 
-SafeCity AI is easily containerized. 
+SafeCity AI is fully containerized using Docker Compose for production deployments.
 
 ### Docker Execution
+To run the full stack (Frontend on port 3000, Backend on port 8000, and PostgreSQL on port 5432):
 ```bash
-docker build -t safecity-backend ./backend
-docker run -p 8000:8000 safecity-backend
+docker-compose up --build -d
+```
+Stop the containers:
+```bash
+docker-compose down
 ```
 
 ---
@@ -324,9 +337,9 @@ docker run -p 8000:8000 safecity-backend
 
 | Version | Features |
 | ------- | -------- |
-| **v1.0 (Current)** | YOLOv8 Human Tracking, Violence Event Engine, MJPEG Streaming |
-| **v1.5** | Fire/Smoke Detection, Weapon Detection |
-| **v2.0** | PostgreSQL Migration, Docker Compose, JWT User Auth |
+| **v1.0** | YOLOv8 Human Tracking, Violence Event Engine, MJPEG Streaming (✅ Complete) |
+| **v1.5** | Fire/Smoke Detection, Weapon Detection (✅ Complete) |
+| **v2.0 (Current)** | PostgreSQL Migration, Docker Compose, JWT User Auth (✅ Complete) |
 | **v3.0** | Edge deployment on NVIDIA Jetson Nanos |
 
 ---
@@ -368,7 +381,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 * Software Engineer & AI Architect
 * 🌐 GitHub: [@vikassaini77](https://github.com/vikassaini77)
 * 💼 LinkedIn: [Vikas Saini](https://linkedin.com/in/vikassaini77)
-* 📧 Email: vikassaini77@gmail.com *(Placeholder)*
+* 📧 Email: vikassaini77@gmail.com
 
 ---
 <div align="center">
