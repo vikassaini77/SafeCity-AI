@@ -11,21 +11,24 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
     "@supabase/supabase-js": "^2.57.4",
     "clsx": "^2.1.0",
+    "date-fns": "^3.3.1",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-globe.gl": "^2.38.0",
     "react-hook-form": "^7.50.1",
+    "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.22.1",
     "recharts": "^2.12.2",
     "tailwind-merge": "^2.2.1",
+    "three": "^0.184.0",
+    "trtc-js-sdk": "^4.15.22",
     "zod": "^3.22.4",
-    "@hookform/resolvers": "^3.3.4",
-    "zustand": "^4.5.1",
-    "date-fns": "^3.3.1",
-    "react-hot-toast": "^2.4.1"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
