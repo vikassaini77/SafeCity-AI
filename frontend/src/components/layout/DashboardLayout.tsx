@@ -3,6 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
+import { ChatbotWidget } from '../chat/ChatbotWidget';
 import { useAuthStore, useAppStore } from '../../store';
 import { cn } from '../../lib/utils';
 
@@ -29,7 +30,7 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <Sidebar />
       <Navbar />
       <motion.main
@@ -42,6 +43,9 @@ export function DashboardLayout() {
           <Outlet />
         </div>
       </motion.main>
+      
+      {/* AI Security Copilot */}
+      <ChatbotWidget />
     </div>
   );
 }

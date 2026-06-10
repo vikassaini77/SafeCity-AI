@@ -1,4 +1,5 @@
 export { Sidebar } from './Sidebar';
 export { Navbar } from './Navbar';
 export { DashboardLayout } from './DashboardLayout';
-export { PublicNavbar, Footer, PublicLayout } from './PublicLayout';
+export { PublicLayout } from './PublicLayout';
+export { LegalPageLayout } from './LegalPageLayout';

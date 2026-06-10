@@ -31,32 +31,34 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', showClose
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
             onClick={onClose}
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={cn(
-              'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full',
-              'bg-surface border border-primary-500/20 rounded-xl shadow-xl z-50',
-              sizes[size]
-            )}
-          >
-            {(title || showClose) && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-                {title && <h2 className="text-lg font-semibold text-white">{title}</h2>}
-                {showClose && (
-                  <button
-                    onClick={onClose}
-                    className="p-1 text-gray-400 hover:text-white transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-            )}
-            <div className="p-6">{children}</div>
-          </motion.div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className={cn(
+                'w-full bg-surface border border-primary-500/20 rounded-xl shadow-xl',
+                'flex flex-col overflow-hidden max-h-full pointer-events-auto',
+                sizes[size]
+              )}
+            >
+              {(title || showClose) && (
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
+                  {title && <h2 className="text-lg font-semibold text-white">{title}</h2>}
+                  {showClose && (
+                    <button
+                      onClick={onClose}
+                      className="p-1 text-gray-400 hover:text-white transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="p-6 overflow-y-auto min-h-0">{children}</div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
