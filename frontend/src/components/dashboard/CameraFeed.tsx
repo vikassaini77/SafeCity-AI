@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Maximize2, Camera, WifiOff, AlertTriangle } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -20,6 +20,7 @@ interface CameraFeedProps {
   camera: CameraType;
   isLive?: boolean;
   showControls?: boolean;
+  compact?: boolean;
   alerts?: Alert[];
   onExpand?: () => void;
 }
@@ -102,6 +103,9 @@ export function CameraFeed({
   const [fps, setFps] = useState(31.4);
   const [detections, setDetections] = useState<DetectionBox[]>([]);
   const [showAccident, setShowAccident] = useState(false);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const trtcClientRef = useRef<any>(null);
+  const localStreamRef = useRef<any>(null);
 
   const scene = cameraScenes[camera.zone] || defaultScene;
 
@@ -183,7 +187,7 @@ export function CameraFeed({
     };
   }, [isLive, camera.status, generateDetections]);
 
-  const isOffline = camera.status === 'offline';
+  const isOffline = camera.status === 'offline' && camera.id !== 'cam-3';
   const isMaintenance = camera.status === 'maintenance';
 
   return (
@@ -213,15 +217,83 @@ export function CameraFeed({
           </div>
         ) : (
           <>
-            {/* Background Video / Image */}
-            {camera.id === 'cam-1' ? (
-              <video 
-                src="/car-demo.mp4" 
-                autoPlay 
-                loop 
-                muted 
-                playsInline 
-                className="absolute inset-0 w-full h-full object-cover"
+            {/* Background Image, Video, or Demo iframe */}
+            {camera.id === 'cam-3' ? (
+              <div className="absolute inset-0 w-full h-full bg-black flex flex-col items-center justify-center">
+                <div id={`trtc-${camera.id}`} className="w-full h-full" />
+                <button 
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    
+                    // Turn OFF logic
+                    if (isBroadcasting) {
+                      try {
+                        if (localStreamRef.current) {
+                          localStreamRef.current.close();
+                          if (trtcClientRef.current) {
+                            await trtcClientRef.current.unpublish(localStreamRef.current);
+                          }
+                          localStreamRef.current = null;
+                        }
+                        if (trtcClientRef.current) {
+                          await trtcClientRef.current.leave();
+                          trtcClientRef.current = null;
+                        }
+                      } catch (err) {
+                        console.error("Failed to close TRTC:", err);
+                      }
+                      setIsBroadcasting(false);
+                      return;
+                    }
+
+                    // Turn ON logic
+                    try {
+                      const TRTC = (await import('trtc-js-sdk')).default;
+                      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/trtc/usersig?userId=cam-3-streamer`);
+                      const data = await res.json();
+                      
+                      const client = TRTC.createClient({
+                        mode: 'live',
+                        sdkAppId: data.appId,
+                        userId: data.userId,
+                        userSig: data.userSig
+                      });
+                      
+                      await client.join({ roomId: 1003, role: 'anchor' });
+                      
+                      const localStream = TRTC.createStream({ audio: false, video: true });
+                      await localStream.initialize();
+                      localStream.play(`trtc-${camera.id}`);
+                      await client.publish(localStream);
+
+                      trtcClientRef.current = client;
+                      localStreamRef.current = localStream;
+                      setIsBroadcasting(true);
+                    } catch (err) {
+                      console.error("TRTC Failed:", err);
+                      // alert("TRTC Failed: " + err); // Disabled to prevent popup block
+                    }
+                  }}
+                  className={cn(
+                    "absolute bottom-4 px-4 py-2 rounded-full font-bold z-50 transition-transform hover:scale-105",
+                    isBroadcasting 
+                      ? "bg-accent-red hover:bg-red-600 text-white shadow-[0_0_15px_rgba(255,59,59,0.4)]" 
+                      : "bg-primary-500 hover:bg-primary-600 text-black shadow-[0_0_15px_rgba(0,242,255,0.4)]"
+                  )}
+                >
+                  {isBroadcasting ? "Stop Broadcast" : "Broadcast Webcam (TRTC)"}
+                </button>
+              </div>
+            ) : ['cam-1', 'cam-2', 'cam-4', 'cam-5'].includes(camera.id) ? (
+              <iframe
+                src={
+                  camera.id === 'cam-1' ? '/safecity_demo.html' :
+                  camera.id === 'cam-2' ? '/safecity_demo_cam2.html' :
+                  camera.id === 'cam-4' ? '/safecity_demo_cam4.html' :
+                  '/safecity_demo_cam5.html'
+                }
+                className="absolute inset-0 w-full h-full border-0 pointer-events-none"
+                style={{ objectFit: 'cover' }}
               />
             ) : (
               <div
@@ -262,8 +334,9 @@ export function CameraFeed({
             />
 
             {/* Detection Boxes */}
-            <AnimatePresence mode="popLayout">
-              {detections.map((det) => (
+            {!['cam-1', 'cam-2', 'cam-4', 'cam-5'].includes(camera.id) && (
+              <AnimatePresence mode="popLayout">
+                {detections.map((det) => (
                 <motion.div
                   key={det.id}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -316,29 +389,32 @@ export function CameraFeed({
                     ID-{Math.floor(Math.random() * 999).toString().padStart(3, '0')}
                   </div>
                 </motion.div>
-              ))}
-            </AnimatePresence>
+                ))}
+              </AnimatePresence>
+            )}
 
             {/* Motion trails for detections */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
-              {detections.map((det) => (
-                <motion.rect
-                  key={`trail-${det.id}`}
-                  x={`${det.x * 100}%`}
-                  y={`${det.y * 100}%`}
-                  width={`${det.w * 100}%`}
-                  height={`${det.h * 100}%`}
-                  fill="none"
-                  stroke={det.color}
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                  initial={{ opacity: 0.5 }}
-                  animate={{ opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  rx="4"
-                />
-              ))}
-            </svg>
+            {!['cam-1', 'cam-2', 'cam-4', 'cam-5'].includes(camera.id) && (
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                {detections.map((det) => (
+                  <motion.rect
+                    key={`trail-${det.id}`}
+                    x={`${det.x * 100}%`}
+                    y={`${det.y * 100}%`}
+                    width={`${det.w * 100}%`}
+                    height={`${det.h * 100}%`}
+                    fill="none"
+                    stroke={det.color}
+                    strokeWidth="1"
+                    strokeDasharray="4 4"
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    rx="4"
+                  />
+                ))}
+              </svg>
+            )}
           </>
         )}
       </div>

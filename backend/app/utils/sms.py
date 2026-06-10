@@ -1,17 +1,20 @@
+import os
 from twilio.rest import Client
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- CONFIGURE THESE WITH YOUR TWILIO KEYS ---
-# (Leave empty if you don't have them yet, it will just print to console)
-TWILIO_SID = "YOUR_TWILIO_SID" 
-TWILIO_TOKEN = "YOUR_TWILIO_AUTH_TOKEN"
-FROM_PHONE = "+1234567890"  # Your Twilio Number
-TO_PHONE = "+919876543210"  # Your Personal Number
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID", "YOUR_TWILIO_SID")
+TWILIO_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "YOUR_TWILIO_AUTH_TOKEN")
+FROM_PHONE = os.getenv("TWILIO_PHONE_NUMBER", "+1234567890")
+TO_PHONE = os.getenv("DESTINATION_PHONE", "+919876543210")
 
 def send_sms_alert(event_type, camera_id="Cam-01"):
     message_body = f"🚨 URGENT: {event_type} detected at {camera_id}! Check Dashboard immediately."
     
     # Check if keys are set
-    if TWILIO_SID == "YOUR_TWILIO_SID":
+    if TWILIO_SID == "YOUR_TWILIO_SID" or not TWILIO_SID:
         print(f"📲 [MOCK SMS]: {message_body}")
         return
 

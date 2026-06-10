@@ -12,7 +12,7 @@ from app.utils.database import add_event_to_db
 from app.utils.socket_manager import manager
 from app.utils.sms import send_sms_alert
 
-from app.inference.yolo_pose import YOLOPose
+from app.inference.yolo_pose import YOLODetector
 from app.inference.tracker import Tracker
 from app.inference.event_engine import EventEngine
 
@@ -25,7 +25,7 @@ router = APIRouter()
 # -------------------------------
 # Initialize models ONCE
 # -------------------------------
-model = YOLOPose()
+model = YOLODetector()
 tracker = Tracker()
 engine = EventEngine()
 
@@ -68,11 +68,13 @@ def run_live_stream():
             frame = cv2.flip(frame, 1)
 
             # 1️⃣ Detection & Tracking
-            detections = model.infer(frame)
-            tracks = tracker.update(detections, frame)
+            person_detections, immediate_events = model.infer(frame)
+            tracks = tracker.update(person_detections, frame)
 
             # 2️⃣ Event Detection
             detected_events = engine.detect(tracks)
+            detected_events.extend(immediate_events)
+            
             anomalous_tracks = set()
             for ev in detected_events:
                 anomalous_tracks.update(ev.get("tracks", []))
@@ -90,6 +92,11 @@ def run_live_stream():
                 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                 cv2.putText(frame, f"ID: {track_id}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+            for ev in immediate_events:
+                x1, y1, x2, y2 = map(int, ev["bbox"])
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 165, 255), 2) # Orange for weapon/suspicious
+                cv2.putText(frame, ev["event"], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
 
             # Broadcast frame for MJPEG live feed
             ret_img, buffer = cv2.imencode('.jpg', frame)
@@ -155,7 +162,7 @@ def run_live_stream():
                     
                     track_ids = ev.get("tracks", [])
                     add_event_to_db(e_type, web_snapshot_path, track_ids)
-                    if e_type.upper() == "VIOLENCE":
+                    if e_type.upper() in ["VIOLENCE", "WEAPON_DETECTED"]:
                         send_sms_alert(e_type)
 
     except Exception as e:
@@ -224,11 +231,13 @@ async def process_video(path: str):
                 break
 
             # 1️⃣ Detection & Tracking
-            detections = model.infer(frame)
-            tracks = tracker.update(detections, frame)
+            person_detections, immediate_events = model.infer(frame)
+            tracks = tracker.update(person_detections, frame)
 
             # 2️⃣ Event Detection
             detected_events = engine.detect(tracks)
+            detected_events.extend(immediate_events)
+            
             anomalous_tracks = set()
             for ev in detected_events:
                 anomalous_tracks.update(ev.get("tracks", []))
@@ -245,6 +254,11 @@ async def process_video(path: str):
                 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                 cv2.putText(frame, f"ID: {track_id}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+            for ev in immediate_events:
+                x1, y1, x2, y2 = map(int, ev["bbox"])
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 165, 255), 2)
+                cv2.putText(frame, ev["event"], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
 
             # 3️⃣ Add frame to buffer
             if not is_recording:
@@ -310,7 +324,7 @@ async def process_video(path: str):
                     # DB and SMS
                     track_ids = ev.get("tracks", [])
                     add_event_to_db(e_type, web_snapshot_path, track_ids)
-                    if e_type.upper() == "VIOLENCE":
+                    if e_type.upper() in ["VIOLENCE", "WEAPON_DETECTED"]:
                         send_sms_alert(e_type)
 
     except Exception as e:

@@ -1,14 +1,20 @@
 import os
 import shutil
+from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+
+# Load environment variables
+load_dotenv()
 
 from app.routes import ingest, search, ask
 # Custom Imports
 from app.routes.stream import router as stream_router
 from app.routes.events import router as events_router
 from app.routes.stream import process_video  # Import logic for upload analysis
+from app.routes.auth import router as auth_router # Import auth router
+from app.routes.trtc import router as trtc_router # Import TRTC router
 from app.utils.database import init_db
 from app.utils.socket_manager import manager
 
@@ -28,11 +34,15 @@ app.add_middleware(
 init_db()
 
 # 4. Mount Static Files (For viewing images)
-# Ensure the folder exists to avoid errors
+# Ensure the folders exist to avoid errors
 os.makedirs("events", exist_ok=True)
+os.makedirs("avatars", exist_ok=True)
 app.mount("/events", StaticFiles(directory="events"), name="events")
+app.mount("/avatars", StaticFiles(directory="avatars"), name="avatars")
 
 # 5. Include Routers
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(trtc_router, prefix="/api/trtc", tags=["trtc"])
 app.include_router(stream_router, prefix="/stream")
 app.include_router(events_router, prefix="/api")
 app.include_router(ingest.router)
