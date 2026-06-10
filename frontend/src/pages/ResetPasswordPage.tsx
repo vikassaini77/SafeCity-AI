@@ -70,12 +70,22 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, new_password: data.password })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.detail || 'Failed to reset password');
+      }
+
       setIsSuccess(true);
       toast.success('Password reset successfully!');
       setTimeout(() => navigate('/login'), 2000);
-    } catch {
-      toast.error('Failed to reset password. Please try again.');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset password. Please try again.');
     } finally {
       setIsLoading(false);
     }

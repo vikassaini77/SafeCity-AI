@@ -587,15 +587,17 @@ export default function LandingPage() {
             </div>
 
             {/* Demo Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {mockCameras.slice(0, 4).map((camera) => (
-                <CameraFeed
-                  key={camera.id}
-                  camera={camera}
-                  isLive={true}
-                  showControls={false}
-                />
-              ))}
+            <div className="flex justify-center mb-6">
+              <div className="w-full max-w-4xl aspect-video relative">
+                {mockCameras.filter(c => c.id === 'cam-1').map((camera) => (
+                  <CameraFeed
+                    key={camera.id}
+                    camera={camera}
+                    isLive={true}
+                    showControls={false}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Info */}

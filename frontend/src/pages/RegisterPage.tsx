@@ -63,7 +63,7 @@ function PasswordStrength({ password }: { password: string }) {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { register: authRegister } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,22 +90,16 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      setUser({
-        id: '1',
+      await authRegister({
+        name: data.full_name,
         email: data.email,
-        full_name: data.full_name,
-        role: 'admin',
-        is_active: true,
-        created_at: new Date().toISOString(),
+        password: data.password
       });
 
-      toast.success('Account created successfully! Welcome to SafeCity AI.');
-      navigate('/dashboard');
-    } catch {
-      toast.error('Registration failed. Please try again.');
+      toast.success('Account created successfully! Please log in.');
+      navigate('/login');
+    } catch (err: any) {
+      toast.error(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -279,11 +273,11 @@ export default function RegisterPage() {
                 />
                 <span className="text-sm text-gray-400">
                   I agree to the{' '}
-                  <Link to="#" className="text-primary-500 hover:text-primary-400">
+                  <Link to="/terms" className="text-primary-500 hover:text-primary-400">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link to="#" className="text-primary-500 hover:text-primary-400">
+                  <Link to="/privacy" className="text-primary-500 hover:text-primary-400">
                     Privacy Policy
                   </Link>
                 </span>

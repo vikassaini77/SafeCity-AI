@@ -13,13 +13,14 @@ import {
   VolumeX,
   Mail,
   Save,
+  Users,
 } from 'lucide-react';
 import { Card, Button, Input, Badge } from '../components/ui';
 import { defaultSettings } from '../data/mockData';
 import toast from 'react-hot-toast';
 import type { AppSettings } from '../types';
 
-type TabId = 'general' | 'notifications' | 'security' | 'ai' | 'integrations';
+type TabId = 'general' | 'notifications' | 'security' | 'users' | 'ai' | 'integrations';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('general');
@@ -30,6 +31,7 @@ export default function SettingsPage() {
     { id: 'general' as const, label: 'General', icon: SettingsIcon },
     { id: 'notifications' as const, label: 'Notifications', icon: Bell },
     { id: 'security' as const, label: 'Security', icon: Shield },
+    { id: 'users' as const, label: 'User Management', icon: Users },
     { id: 'ai' as const, label: 'AI Model', icon: Cpu },
     { id: 'integrations' as const, label: 'Integrations', icon: Link },
   ];
@@ -289,7 +291,7 @@ export default function SettingsPage() {
                       <p className="text-sm text-gray-500">Add an extra layer of security</p>
                     </div>
                   </div>
-                  <Badge variant="warning">Coming Soon</Badge>
+                  <Button variant="secondary" size="sm">Enable 2FA</Button>
                 </div>
 
                 <Card className="bg-secondary-900/50 border-gray-700">
@@ -340,6 +342,91 @@ export default function SettingsPage() {
                     Generate New Key
                   </Button>
                 </Card>
+              </motion.div>
+            )}
+
+            {activeTab === 'users' && (
+              <motion.div
+                key="users"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-heading font-bold text-white">User Management</h2>
+                  <Button size="sm">
+                    <Users className="w-4 h-4 mr-2" />
+                    Invite User
+                  </Button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-gray-800 text-sm text-gray-400">
+                        <th className="py-3 px-4 font-medium">User</th>
+                        <th className="py-3 px-4 font-medium">Role</th>
+                        <th className="py-3 px-4 font-medium">Status</th>
+                        <th className="py-3 px-4 font-medium">Last Active</th>
+                        <th className="py-3 px-4 font-medium text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-sm divide-y divide-gray-800/50">
+                      <tr className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center font-bold text-xs">AJ</div>
+                            <div>
+                              <div className="text-white font-medium">Alex Johnson</div>
+                              <div className="text-gray-500 text-xs">alex@safecity.ai</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4"><Badge variant="default">Admin</Badge></td>
+                        <td className="py-3 px-4"><Badge variant="success">Active</Badge></td>
+                        <td className="py-3 px-4 text-gray-400">Just now</td>
+                        <td className="py-3 px-4 text-right">
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">SC</div>
+                            <div>
+                              <div className="text-white font-medium">Sarah Chen</div>
+                              <div className="text-gray-500 text-xs">sarah@safecity.ai</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4"><Badge variant="warning">Analyst</Badge></td>
+                        <td className="py-3 px-4"><Badge variant="success">Active</Badge></td>
+                        <td className="py-3 px-4 text-gray-400">2 hours ago</td>
+                        <td className="py-3 px-4 text-right">
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-700 text-gray-400 flex items-center justify-center font-bold text-xs">MR</div>
+                            <div>
+                              <div className="text-white font-medium">Mike Ross</div>
+                              <div className="text-gray-500 text-xs">mike@safecity.ai</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4"><Badge variant="error">Viewer</Badge></td>
+                        <td className="py-3 px-4"><Badge variant="warning">Invited</Badge></td>
+                        <td className="py-3 px-4 text-gray-400">Never</td>
+                        <td className="py-3 px-4 text-right">
+                          <Button variant="ghost" size="sm">Resend</Button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </motion.div>
             )}
 

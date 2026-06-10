@@ -39,8 +39,16 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send request');
+      }
+
       setSubmittedEmail(data.email);
       setIsSubmitted(true);
       toast.success('Reset link sent to your email');

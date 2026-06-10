@@ -153,7 +153,18 @@ export default function ReportsPage() {
                     <Button size="sm" variant="ghost" onClick={() => setViewingReport(report)}>
                       <Eye className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="ghost">
+                    <Button size="sm" variant="ghost" onClick={() => {
+                      const content = `Report: ${report.title}\nDate: ${formatDate(report.date_from)} - ${formatDate(report.date_to)}\n\nSummary:\n${report.content.summary || ''}\n\nStats:\nTotal Alerts: ${report.content.total_alerts}\nLow: ${report.content.alerts_by_severity.low}\nMedium: ${report.content.alerts_by_severity.medium}\nHigh/Critical: ${report.content.alerts_by_severity.high + report.content.alerts_by_severity.critical}`;
+                      const blob = new Blob([content], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${report.title.replace(/\s+/g, '_')}.txt`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </>
@@ -313,7 +324,7 @@ function ReportGenerator({
 // Report Preview Component
 function ReportPreview({ report, onClose }: { report: Report; onClose: () => void }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col h-full">
       {/* Report Header */}
       <div className="border-b border-gray-800 pb-4">
         <h2 className="text-xl font-heading font-bold text-white">{report.title}</h2>
@@ -351,13 +362,24 @@ function ReportPreview({ report, onClose }: { report: Report; onClose: () => voi
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-4 border-t border-gray-800">
+      <div className="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-800 shrink-0">
         <Button variant="secondary" onClick={onClose}>
           Close
         </Button>
-        <Button>
+        <Button onClick={() => {
+          const content = `Report: ${report.title}\nDate: ${formatDate(report.date_from)} - ${formatDate(report.date_to)}\n\nSummary:\n${report.content.summary || ''}\n\nStats:\nTotal Alerts: ${report.content.total_alerts}\nLow: ${report.content.alerts_by_severity.low}\nMedium: ${report.content.alerts_by_severity.medium}\nHigh/Critical: ${report.content.alerts_by_severity.high + report.content.alerts_by_severity.critical}`;
+          const blob = new Blob([content], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${report.title.replace(/\s+/g, '_')}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }}>
           <Download className="w-4 h-4" />
-          Download PDF
+          Download Report
         </Button>
       </div>
     </div>

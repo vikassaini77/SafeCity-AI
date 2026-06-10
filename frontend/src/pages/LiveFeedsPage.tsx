@@ -35,10 +35,10 @@ export default function LiveFeedsPage() {
   const toggleLiveWebcam = async () => {
     try {
       if (isLiveWebcamActive) {
-        await fetch('http://127.0.0.1:8000/stream/live/stop', { method: 'POST' });
+        await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/stream/live/stop`, { method: 'POST' });
         setIsLiveWebcamActive(false);
       } else {
-        await fetch('http://127.0.0.1:8000/stream/live/start', { method: 'POST' });
+        await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/stream/live/start`, { method: 'POST' });
         setIsLiveWebcamActive(true);
       }
     } catch (err) {
@@ -66,7 +66,7 @@ export default function LiveFeedsPage() {
   const zones = ['all', ...new Set(displayCameras.map((c) => c.zone))];
 
   const filteredCameras = displayCameras.filter(
-    (c) => selectedZone === 'all' || c.zone === selectedZone
+    (c) => (selectedZone === 'all' || c.zone === selectedZone) && c.id !== 'cam-4'
   );
 
   const gridCols: Record<GridSize, string> = {
@@ -158,16 +158,18 @@ export default function LiveFeedsPage() {
       </div>
 
       {/* Demo Info Banner */}
-      <Card className="bg-gradient-to-r from-primary-500/10 to-accent-green/10 border-primary-500/30">
+      <Card 
+        className="bg-gradient-to-r from-primary-500/10 to-accent-green/10 border-primary-500/30 cursor-pointer hover:border-primary-500/60 transition-all hover:shadow-[0_0_15px_rgba(0,242,255,0.2)] group"
+        onClick={() => setExpandedCamera('cam-4')}
+      >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center">
-            <Zap className="w-6 h-6 text-primary-500" />
+          <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center group-hover:bg-primary-500/30 transition-colors">
+            <Zap className="w-6 h-6 text-primary-500 group-hover:scale-110 transition-transform" />
           </div>
           <div className="flex-1">
-            <h3 className="text-white font-heading font-bold">Live AI Detection Demo</h3>
+            <h3 className="text-white font-heading font-bold group-hover:text-primary-400 transition-colors">Live AI Detection Demo</h3>
             <p className="text-sm text-gray-400">
-              Detection boxes update in real-time showing persons (cyan) and vehicles (green).
-              Confidence scores and tracking IDs are displayed for each object.
+              Click here to view the full-screen interactive tracking demo. Detection boxes update in real-time showing persons (cyan) and vehicles (green).
             </p>
           </div>
           <div className="hidden md:flex items-center gap-4 text-sm">
@@ -179,6 +181,9 @@ export default function LiveFeedsPage() {
               <div className="w-4 h-4 border-2 border-accent-green rounded" />
               <span className="text-gray-400">Vehicle</span>
             </div>
+            <Button variant="secondary" size="sm" className="ml-4 pointer-events-none group-hover:bg-primary-500/20">
+              View Demo
+            </Button>
           </div>
         </div>
       </Card>
@@ -191,7 +196,7 @@ export default function LiveFeedsPage() {
             <span className="text-sm font-medium text-white tracking-wider">LIVE WEBCAM AI</span>
           </div>
           <img 
-            src="http://127.0.0.1:8000/stream/live/feed" 
+            src={`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/stream/live/feed`} 
             alt="Live Webcam Feed" 
             className="w-full h-auto max-h-[70vh] object-contain"
           />

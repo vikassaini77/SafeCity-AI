@@ -19,7 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { login } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,26 +42,11 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Demo login check
-      if (data.email === 'demo@safecity.ai' && data.password === 'Demo@1234') {
-        setUser({
-          id: '1',
-          email: data.email,
-          full_name: 'Alex Johnson',
-          role: 'admin',
-          is_active: true,
-          created_at: new Date().toISOString(),
-        });
-        toast.success('Welcome back, Alex!');
-        navigate('/dashboard');
-      } else {
-        setError('Invalid email or password. Try demo@safecity.ai / Demo@1234');
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+      await login({ email: data.email, password: data.password });
+      toast.success('Login successful!');
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -81,32 +66,36 @@ export default function LoginPage() {
 
         {/* Animated detection boxes */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1563982632107-86316b5872a0?w=1920')] bg-cover bg-center opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-80" 
+            style={{ backgroundImage: "url('/cctv_bg.png')" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
 
           {/* Simulated detection boxes */}
           <motion.div
             animate={{
-              x: [0, 20, 0],
-              y: [0, 10, 0],
+              x: [0, 15, 0],
+              y: [0, 5, 0],
             }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute top-[20%] left-[30%] w-32 h-48 border-2 border-primary-500 rounded"
+            className="absolute top-[35%] left-[10%] w-32 h-64 border-2 border-primary-500 rounded bg-primary-500/10"
           >
-            <span className="absolute -top-6 left-0 px-2 py-1 bg-primary-500 text-secondary-900 text-xs font-mono font-bold rounded">
+            <span className="absolute -top-6 left-0 px-2 py-1 bg-primary-500 text-secondary-900 text-xs font-mono font-bold rounded shadow-lg">
               Person 94%
             </span>
           </motion.div>
 
           <motion.div
             animate={{
-              x: [0, -15, 0],
-              y: [0, 20, 0],
+              x: [0, -10, 0],
+              y: [0, 10, 0],
             }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-            className="absolute top-[40%] left-[60%] w-40 h-24 border-2 border-accent-green rounded"
+            className="absolute top-[50%] left-[55%] w-72 h-32 border-2 border-accent-green rounded bg-accent-green/10"
           >
-            <span className="absolute -top-6 left-0 px-2 py-1 bg-accent-green text-secondary-900 text-xs font-mono font-bold rounded">
+            <span className="absolute -top-6 left-0 px-2 py-1 bg-accent-green text-secondary-900 text-xs font-mono font-bold rounded shadow-lg">
               Vehicle 87%
             </span>
           </motion.div>
@@ -256,13 +245,19 @@ export default function LoginPage() {
             <span className="text-xs text-gray-600">(Coming Soon)</span>
           </button>
 
-          {/* Sign up link */}
-          <p className="mt-8 text-center text-gray-400">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-500 hover:text-primary-400 transition-colors font-medium">
-              Create one
-            </Link>
-          </p>
+          <div className="mt-8 pt-8 border-t border-gray-800 text-center">
+            <a href="/sso-login" className="inline-flex items-center text-gray-400 hover:text-white transition-colors gap-2 group mb-6">
+              <Shield className="w-5 h-5 text-gray-500 group-hover:text-primary-400 transition-colors" />
+              <span>Sign in with Enterprise SSO/SAML</span>
+            </a>
+            
+            <p className="text-gray-400">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-primary-500 hover:text-primary-400 transition-colors font-medium">
+                Create one
+              </Link>
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>

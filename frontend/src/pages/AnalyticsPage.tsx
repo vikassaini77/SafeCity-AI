@@ -41,39 +41,51 @@ type DateRange = 'today' | '7d' | '30d' | 'custom';
 export default function AnalyticsPage() {
   const { cameras } = useAppStore();
   const [dateRange, setDateRange] = useState<DateRange>('7d');
-  const [analyticsData, setAnalyticsData] = useState(generateAnalyticsData());
+  
+  const getDays = (range: DateRange) => range === 'today' ? 1 : range === '7d' ? 7 : 30;
+
+  const [analyticsData, setAnalyticsData] = useState(() => generateAnalyticsData(getDays('7d')));
 
   useEffect(() => {
-    // Refresh analytics data
+    const days = getDays(dateRange);
+    // Refresh analytics data immediately when dateRange changes
+    setAnalyticsData(generateAnalyticsData(days));
+    
     const interval = setInterval(() => {
-      setAnalyticsData(generateAnalyticsData());
+      setAnalyticsData(generateAnalyticsData(days));
     }, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [dateRange]);
 
-  const severities = [
-    { name: 'Low', value: 120, color: '#00FF88' },
-    { name: 'Medium', value: 180, color: '#FFB800' },
-    { name: 'High', value: 45, color: '#FF6B35' },
-    { name: 'Critical', value: 12, color: '#FF3B3B' },
-  ];
+  const severities = analyticsData.by_severity.map(s => ({
+    name: s.severity.charAt(0).toUpperCase() + s.severity.slice(1),
+    value: s.count,
+    color: s.severity === 'critical' ? '#FF3B3B' : s.severity === 'high' ? '#FF6B35' : s.severity === 'medium' ? '#FFB800' : '#00FF88'
+  }));
 
   const COLORS = ['#00F2FF', '#00FF88', '#FFB800', '#FF6B35', '#FF3B3B'];
 
-  const hours = Array.from({ length: 24 }, (_, i) => ({
-    hour: i,
-    count: Math.floor(Math.random() * 15) + (i >= 8 && i <= 20 ? 10 : 3),
+  const hours = analyticsData.hourly_heatmap;
+
+  const weekData = analyticsData.timeline.map((t) => ({
+    day: new Date(t.timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
+    alerts: t.count,
+    resolved: Math.floor(t.count * (0.8 + Math.random() * 0.15)),
   }));
 
-  const weekData = [
-    { day: 'Mon', alerts: 45, resolved: 42 },
-    { day: 'Tue', alerts: 52, resolved: 48 },
-    { day: 'Wed', alerts: 38, resolved: 35 },
-    { day: 'Thu', alerts: 61, resolved: 58 },
-    { day: 'Fri', alerts: 55, resolved: 50 },
-    { day: 'Sat', alerts: 28, resolved: 25 },
-    { day: 'Sun', alerts: 22, resolved: 20 },
-  ];
+  const handleExport = () => {
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Date,Total Alerts,Resolved\n"
+      + weekData.map(row => `"${row.day}",${row.alerts},${row.resolved}`).join("\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `safecity_analytics_${dateRange}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-6">
@@ -104,7 +116,7 @@ export default function AnalyticsPage() {
             ))}
           </div>
 
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="sm" onClick={handleExport}>
             <Download className="w-4 h-4" />
             Export Report
           </Button>
