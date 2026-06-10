@@ -19,6 +19,19 @@
     scroll-behavior: smooth;
   }
 
+  /* Rapid Light Mode implementation via CSS Filters */
+  html.light-mode {
+    filter: invert(1) hue-rotate(180deg);
+    background: white; /* Prevent background bleeding */
+  }
+
+  html.light-mode img, 
+  html.light-mode video, 
+  html.light-mode svg.lucide,
+  html.light-mode .no-invert {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
   ::-webkit-scrollbar {
     @apply w-2 h-2;
   }

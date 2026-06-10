@@ -10,7 +10,7 @@ export const useSafeCityAPI = () => {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/list');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/list`);
         const data = await res.json();
         
         // Map backend alerts to frontend types
@@ -21,8 +21,8 @@ export const useSafeCityAPI = () => {
           anomaly_type: e.event_type || e.type,
           severity: 'high',
           confidence: 0.95,
-          frame_snapshot_url: `http://127.0.0.1:8000${e.path}`,
-          video_clip_url: e.video_path ? `http://127.0.0.1:8000${e.video_path}` : undefined,
+          frame_snapshot_url: `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}${e.path}`,
+          video_clip_url: e.video_path ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}${e.video_path}` : undefined,
           bounding_boxes: [],
           status: 'active',
           created_at: new Date().toISOString(),
@@ -41,7 +41,7 @@ export const useSafeCityAPI = () => {
   // Handle WebSocket connection
   useEffect(() => {
     const connectWs = () => {
-      const socket = new WebSocket('ws://127.0.0.1:8000/ws');
+      const socket = new WebSocket(import.meta.env.VITE_WS_URL || 'ws://127.0.0.1:8000/ws');
       wsRef.current = socket;
 
       socket.onopen = () => {
@@ -60,8 +60,8 @@ export const useSafeCityAPI = () => {
               anomaly_type: data.event_type || 'Unknown',
               severity: 'high',
               confidence: 0.95,
-              frame_snapshot_url: `http://127.0.0.1:8000${data.path}`,
-              video_clip_url: data.video_path ? `http://127.0.0.1:8000${data.video_path}` : undefined,
+              frame_snapshot_url: `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}${data.path}`,
+              video_clip_url: data.video_path ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}${data.video_path}` : undefined,
               bounding_boxes: [],
               status: 'active',
               created_at: new Date().toISOString(),
@@ -75,14 +75,14 @@ export const useSafeCityAPI = () => {
       };
 
       socket.onclose = () => {
-        console.log('WebSocket Disconnected');
+        console.log('WebSocket Disconnected (Backend might be down)');
         setWsConnected(false);
-        // Reconnect after 3 seconds
-        setTimeout(connectWs, 3000);
+        // Reconnect after 30 seconds to prevent console spam
+        setTimeout(connectWs, 30000);
       };
 
-      socket.onerror = (error) => {
-        console.error('WebSocket Error:', error);
+      socket.onerror = () => {
+        // Silently handle WS error to prevent console spam (browser will still log the connection failure once)
       };
     };
 

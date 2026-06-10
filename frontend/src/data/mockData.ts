@@ -249,38 +249,41 @@ export function generateKPIMetrics(): KPIMetrics {
 }
 
 // Analytics data generator
-export function generateAnalyticsData(): AnalyticsData {
+export function generateAnalyticsData(days: number = 7): AnalyticsData {
   const now = new Date();
+  const multiplier = days === 1 ? 1 : days === 7 ? 7 : 30;
 
   return {
     overview: {
-      total_alerts: mockAlerts.length,
+      total_alerts: mockAlerts.length * multiplier,
       total_cameras: mockCameras.length,
       avg_response_time: 4.2,
       uptime_percentage: 99.7,
     },
-    timeline: Array.from({ length: 24 }, (_, i) => ({
-      timestamp: new Date(now.getTime() - (23 - i) * 60 * 60 * 1000).toISOString(),
-      count: Math.floor(Math.random() * 20) + 5,
+    timeline: Array.from({ length: days === 1 ? 24 : days }, (_, i) => ({
+      timestamp: days === 1 
+        ? new Date(now.getTime() - (23 - i) * 60 * 60 * 1000).toISOString()
+        : new Date(now.getTime() - (days - 1 - i) * 24 * 60 * 60 * 1000).toISOString(),
+      count: Math.floor(Math.random() * 20 * (days === 1 ? 1 : 10)) + 5,
     })),
     by_camera: mockCameras.slice(0, 5).map(c => ({
       camera_id: c.id,
       name: c.name,
-      count: Math.floor(Math.random() * 50) + 10,
+      count: Math.floor(Math.random() * 50 * multiplier) + 10,
     })),
     by_type: anomalyTypes.slice(0, 6).map(type => ({
       type,
-      count: Math.floor(Math.random() * 40) + 5,
+      count: Math.floor(Math.random() * 40 * multiplier) + 5,
     })),
     by_severity: [
-      { severity: 'low', count: Math.floor(Math.random() * 50) + 30 },
-      { severity: 'medium', count: Math.floor(Math.random() * 40) + 25 },
-      { severity: 'high', count: Math.floor(Math.random() * 30) + 15 },
-      { severity: 'critical', count: Math.floor(Math.random() * 15) + 5 },
+      { severity: 'low', count: Math.floor(Math.random() * 50 * multiplier) + 30 },
+      { severity: 'medium', count: Math.floor(Math.random() * 40 * multiplier) + 25 },
+      { severity: 'high', count: Math.floor(Math.random() * 30 * multiplier) + 15 },
+      { severity: 'critical', count: Math.floor(Math.random() * 15 * multiplier) + 5 },
     ],
     hourly_heatmap: Array.from({ length: 24 }, (_, hour) => ({
       hour,
-      count: Math.floor(Math.random() * 15) + (hour >= 8 && hour <= 18 ? 10 : 3),
+      count: Math.floor(Math.random() * 15 * multiplier) + (hour >= 8 && hour <= 18 ? 10 * multiplier : 3 * multiplier),
     })),
     confidence_distribution: [
       { range: '60-70%', count: 25 },

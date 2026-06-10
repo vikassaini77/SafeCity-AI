@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#wrap{display:flex;flex-direction:column;width:100%;height:100vh;background:#0d0d0d;font-family:'Courier New',monospace}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:#111;border-bottom:1px solid #1e1e1e}
+.logo{font-size:13px;font-weight:700;color:#00e5ff;letter-spacing:2px}
+.live{display:flex;align-items:center;gap:7px;font-size:10px;color:#777}
+.dot{width:7px;height:7px;border-radius:50%;background:#00e676;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+#main{display:flex;flex:1;min-height:0}
+#fw{flex:1;position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+canvas{display:block;max-width:100%;max-height:100%;object-fit:contain}
+#otl{position:absolute;top:8px;left:8px;font-size:9px;color:#00e5ff;background:rgba(0,0,0,.7);padding:3px 8px;border:1px solid #00e5ff33;border-radius:2px;letter-spacing:1px}
+#fps{position:absolute;top:8px;right:8px;font-size:10px;color:#00e676;background:rgba(0,0,0,.7);padding:3px 8px;border:1px solid #00e67633;border-radius:2px}
+#vbadge{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:900;padding:9px 24px;border:2px solid;border-radius:3px;letter-spacing:2px;display:none;animation:fl .35s infinite alternate;white-space:nowrap;background:rgba(0,0,0,.88)}
+.vbc{color:#ff9100;border-color:#ff9100}
+.vbv{color:#ff1744;border-color:#ff1744}
+@keyframes fl{from{opacity:1}to{opacity:.2}}
+#sb{width:215px;background:#0f0f0f;border-left:1px solid #1a1a1a;display:flex;flex-direction:column}
+#stl{font-size:9px;color:#444;padding:7px 11px;border-bottom:1px solid #1a1a1a;letter-spacing:2px}
+#elog{flex:1;overflow-y:auto;padding:5px}
+.ei{padding:6px 8px;border-radius:3px;margin-bottom:4px;font-size:9px;border-left:3px solid transparent;animation:sin .25s ease}
+@keyframes sin{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.ev{background:rgba(255,23,68,.13);border-color:#ff1744;color:#ff8a80}
+.ec{background:rgba(255,145,0,.13);border-color:#ff9100;color:#ffcc80}
+.ep{background:rgba(0,229,255,.08);border-color:#00e5ff;color:#80d8ff}
+.eca{background:rgba(255,234,0,.08);border-color:#ffea00;color:#fff9c4}
+.et{background:rgba(0,230,118,.07);border-color:#00e676;color:#b9f6ca}
+.etime{color:#444;font-size:8px;display:block;margin-top:2px}
+#bot{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:#0c0c0c;border-top:1px solid #1a1a1a}
+#stats{display:flex;gap:16px}
+.sv{font-size:15px;font-weight:700;color:#00e5ff}
+.sl{font-size:8px;color:#444;letter-spacing:1px;margin-top:1px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="topbar">
+    <div class="logo">SAFECITY AI</div>
+    <div class="live"><div class="dot"></div><span>LIVE — CAM_02 / PARKING NORTH</span></div>
+    <div style="font-size:9px;color:#333" id="clk">--:--:--</div>
+  </div>
+  <div id="main">
+    <div id="fw">
+      <canvas id="c" width="760" height="370"></canvas>
+      <div id="otl">YOLOv8 + DeepSORT ▪ PARKING</div>
+      <div id="fps">49 FPS</div>
+      <div id="vbadge"></div>
+    </div>
+    <div id="sb">
+      <div id="stl">Event Log</div>
+      <div id="elog"></div>
+    </div>
+  </div>
+  <div id="bot">
+    <div id="stats">
+      <div><div class="sv" id="spe">0</div><div class="sl">PERSONS</div></div>
+      <div><div class="sv" id="sve">0</div><div class="sl">VEHICLES</div></div>
+      <div><div class="sv" id="see">0</div><div class="sl">EVENTS</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('c'),cx=cv.getContext('2d');
+const W=760,H=370;
+
+let frame=0, phaseT=0, evtCount=0, alertTimer=0;
+let person = {x: W+20, y: 190, vx: -1.5, vy: 0, state: 'walking', timer: 0};
+const parkedCars = [
+  {x: 200, y: 150, col: '#ffeb3b'},
+  {x: 350, y: 150, col: '#f44336'},
+  {x: 500, y: 150, col: '#2196f3'}
+];
+
+function drawPerson(x,y,col,label,conf,anomalyLevel) {
+  const s=24; cx.save(); cx.translate(x,y);
+  const c = anomalyLevel === 2 ? '#ff1744' : (anomalyLevel === 1 ? '#ff9100' : col);
+  
+  if(anomalyLevel > 0){
+    const g=cx.createRadialGradient(0,0,0,0,0,40);
+    g.addColorStop(0, anomalyLevel===2 ? 'rgba(255,23,68,0.3)' : 'rgba(255,145,0,0.3)');
+    g.addColorStop(1,'transparent');
+    cx.fillStyle=g; cx.beginPath(); cx.arc(0,0,40,0,Math.PI*2); cx.fill();
+  }
+
+  cx.fillStyle=c; cx.beginPath(); cx.arc(0,-s*.8,s*.15,0,Math.PI*2); cx.fill();
+  cx.strokeStyle=c; cx.lineWidth=s*.1;
+  cx.beginPath(); cx.moveTo(0,-s*.6); cx.lineTo(0,-s*.2); cx.stroke();
+  cx.beginPath(); cx.moveTo(-s*.25,-s*.5); cx.lineTo(s*.25,-s*.5); cx.stroke();
+  cx.beginPath(); cx.moveTo(0,-s*.2); cx.lineTo(-s*.15,s*.25); cx.stroke();
+  cx.beginPath(); cx.moveTo(0,-s*.2); cx.lineTo(s*.15,s*.25); cx.stroke();
+
+  const bw=s*1,bh=s*1.2,bx=-bw/2,by=-s;
+  cx.strokeStyle=c; cx.lineWidth=anomalyLevel?2:1.2; cx.strokeRect(bx,by,bw,bh);
+  
+  cx.fillStyle=c; cx.fillRect(bx,by-12,bw+15,12);
+  cx.fillStyle='#000'; cx.font='bold 7px Courier New';
+  cx.fillText(label+' '+conf, bx+2, by-3);
+  cx.restore();
+}
+
+function drawParkedCar(x,y,col) {
+  const cw=60,ch=110; cx.save(); cx.translate(x,y);
+  cx.fillStyle=col+'15'; cx.fillRect(-cw/2,-ch/2,cw,ch);
+  cx.strokeStyle=col; cx.lineWidth=1.5; cx.strokeRect(-cw/2,-ch/2,cw,ch);
+  cx.fillStyle=col+'30'; cx.fillRect(-cw*.4,-ch*.35,cw*.8,ch*.2);
+  cx.fillStyle=col+'20'; cx.fillRect(-cw*.4,ch*.15,cw*.8,ch*.2);
+  cx.strokeStyle=col+'60'; cx.strokeRect(-cw*.4,-ch*.15,cw*.8,ch*.3);
+  cx.restore();
+}
+
+function drawBg() {
+  cx.fillStyle='#06080b'; cx.fillRect(0,0,W,H);
+  cx.strokeStyle='#1a2830'; cx.lineWidth=2;
+  // Parking lines
+  for(let x=125; x<600; x+=150) {
+    cx.beginPath(); cx.moveTo(x,50); cx.lineTo(x,250); cx.stroke();
+  }
+  cx.beginPath(); cx.moveTo(100,50); cx.lineTo(600,50); cx.stroke();
+  cx.fillStyle='#0e1820'; cx.font='10px Courier New'; cx.fillText('NORTH PARKING - ZONE B', 20, 30);
+  cx.fillStyle='#131e27'; cx.fillRect(0,H-28,W,28);
+  cx.fillStyle='#162030'; cx.font='8px Courier New';
+  cx.fillText('REC ● ' + new Date().toISOString().slice(0,19).replace('T',' '), 12, H-11);
+}
+
+function addLog(cls,msg) {
+  const d=document.createElement('div'); d.className='ei '+cls;
+  d.innerHTML=msg+'<span class="etime">'+new Date().toLocaleTimeString('en-US',{hour12:false})+'</span>';
+  const el=document.getElementById('elog');
+  el.insertBefore(d,el.firstChild);
+  if(el.children.length>25) el.removeChild(el.lastChild);
+}
+
+function showBadge(msg,cls) {
+  const b=document.getElementById('vbadge');
+  b.textContent=msg; b.className=cls; b.style.display='block';
+}
+
+function tick() {
+  frame++; phaseT++;
+  if(phaseT > 900) {
+    phaseT = 0; person = {x: W+20, y: 190, vx: -1.5, vy: 0, state: 'walking', timer: 0};
+    document.getElementById('elog').innerHTML='';
+    addLog('et','✓ SYSTEM RESET');
+  }
+
+  drawBg();
+  parkedCars.forEach(c => drawParkedCar(c.x, c.y, c.col));
+
+  let anomaly = 0;
+
+  if (phaseT < 200) {
+    person.x += person.vx; // walking in
+  } else if (phaseT < 400) {
+    // lingering by middle car
+    person.state = 'loitering';
+    person.vx = (Math.random()-.5)*0.5;
+    person.vy = (Math.random()-.5)*0.5;
+    person.x += person.vx; person.y += person.vy;
+    person.x = Math.max(300, Math.min(400, person.x));
+    person.y = Math.max(160, Math.min(220, person.y));
+    anomaly = 1;
+    if(phaseT === 250) {
+      showBadge('⚠ SUSPICIOUS LOITERING','vbadge vbc');
+      addLog('ec', '⚠ LOITERING DETECTED - ID_P01');
+      evtCount++; document.getElementById('see').textContent=evtCount;
+    }
+  } else if (phaseT < 600) {
+    // trying to break in
+    person.state = 'theft';
+    person.x = 320 + (Math.random()-.5)*2; // touching car door
+    person.y = 150 + (Math.random()-.5)*2;
+    anomaly = 2;
+    if(phaseT === 410) {
+      showBadge('⚡ VEHICLE BREAK-IN ATTEMPT','vbadge vbv');
+      addLog('ev', '⚡ THEFT ATTEMPT - ID_P01');
+      evtCount++; document.getElementById('see').textContent=evtCount;
+    }
+  } else {
+    // runs away
+    document.getElementById('vbadge').style.display='none';
+    person.x += 3; // running right
+    person.y += (Math.random()-.5);
+  }
+
+  if(person.x > -20 && person.x < W+20) {
+    drawPerson(person.x, person.y, '#00e5ff', 'ID_P01', '0.92', anomaly);
+  }
+
+  if(frame%30===0) {
+    document.getElementById('fps').textContent=(45+Math.floor(Math.random()*10))+' FPS';
+    document.getElementById('clk').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+    document.getElementById('spe').textContent = (person.x > 0 && person.x < W) ? '1' : '0';
+    document.getElementById('sve').textContent = '3';
+  }
+
+  requestAnimationFrame(tick);
+}
+
+addLog('et','✓ SYSTEM INITIALIZED');
+addLog('eca','+ VEHICLE DETECTED - 3 PARKED');
+tick();
+</script>
+</body>
+</html>
